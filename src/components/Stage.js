@@ -7,7 +7,8 @@ class Stage extends Component {
   render() {
     return (
       <div className="pane text-center">
-        stage
+        <span className="name">Stage</span>
+        
         <div className="row space-between">
           <div
             className="button"
@@ -27,6 +28,8 @@ class Stage extends Component {
         </div>
         
         <div>enemies killed {this.props.store.killed}</div>
+        
+        <input type="checkbox" name="autoadvance" checked={this.props.store.autoAdvance} onChange={this.props.store.toggleAutoAdvance} />Autoadvance
       </div>
     );
   }

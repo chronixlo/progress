@@ -21,15 +21,21 @@ class Item {
   equipped = false;
 
 
-  constructor(level, isBoss = false) {
+  constructor(maxLevel, isBoss = false) {
     // epic
     if (isBoss && Math.random() > 0.9) {
       this.rarity = 2;
-      level += 5;
+      maxLevel += 5;
+
+      // lege
+      if (Math.random() > 0.9) {
+        this.rarity = 3;
+        maxLevel += 5;
+      }
     }
 
     this.id = 'i' + Date.now().toString(36);
-    this.level = level;
+    this.level = Math.floor(Math.random() * maxLevel) + 1;
     this.type = randomFrom(ITEM_TYPES);
 
     let type = this.type === 'weapon' ? randomFrom(WEAPON_TYPES) : this.type;
@@ -42,7 +48,7 @@ class Item {
       this.name = type + ' of the ' + ucfirst(randomFrom(DESC));
     }
 
-    let remaining = level * 3;
+    let remaining = this.level;
     
     let str = Math.floor(Math.random() * (remaining + 1));
     this.stats.str = str;

@@ -18,6 +18,8 @@ class Player extends Component {
       <div className="pane">
         <div className="row space-between">
           <span className="name">You</span>
+          <span>{-player.lastHit}</span>
+          <span>{'+' + player.lastHeal}</span>
           <div className="total-level">{player.total}</div>
         </div>
 

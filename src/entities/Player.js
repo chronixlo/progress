@@ -22,6 +22,7 @@ class Player {
   };
 
   @observable inventory = new Map();
+  @observable selected = null;
   
   @observable gear = {
     armor: null,
@@ -29,7 +30,9 @@ class Player {
     weapon: null
   };
 
-  @observable damageTaken = 0; 
+  @observable damageTaken = 0;
+  @observable lastHit = 0; 
+  @observable lastHeal = 0;
 
   lastAttackFrame = 0;
   attackInterval = 2;
@@ -57,7 +60,9 @@ class Player {
 
   @computed
   get bestItems() {
-    return this.inventory.values().sort((a, b) => b.level - a.level);
+    const selected = this.selected;
+
+    return this.inventory.values().filter(i => selected === null || selected === i.type).sort((a, b) => b.level - a.level || b.rarity - a.rarity);
   }
 
   @computed
@@ -121,8 +126,34 @@ class Player {
   }
 
   @action.bound
+  selectFilter(name) {
+    if (name === this.selected) {
+      this.selected = null;
+      return;
+    }
+    this.selected = name;
+  }
+
+  @action.bound
   clearInventory() {
     this.inventory.clear();
+  }
+
+  @action.bound
+  clearObsolete() {
+    const gear = this.gear;
+
+    if (!gear.armor || !gear.helmet || !gear.weapon) {
+      return;
+    }
+
+    const cutoff = Math.min(gear.armor.level, gear.helmet.level, gear.weapon.level) - 1;
+
+    this.inventory.forEach(action.bound((value, key) => {
+      if (value.level < cutoff) {
+        this.inventory.delete(key);
+      }
+    }))
   }
 };
 

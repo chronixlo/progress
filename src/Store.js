@@ -2,16 +2,15 @@ import {action, computed, observable, toJS} from 'mobx';
 import Enemy from './entities/Enemy';
 import Player from './entities/Player';
 
-const STAGEMULTI = 1;
+const STAGEMULTI = 1.5;
 
 class Store {
   @observable player = new Player();
   @observable enemy = new Enemy(1);
-  @observable lastIn = null;
-  @observable lastOut = null;
   @observable killed = 0;
   @observable stage = 1;
   @observable highestStage = 1;
+  @observable autoAdvance = true;
   
 
   frame = 0;
@@ -19,8 +18,13 @@ class Store {
   constructor() {
     this.loadGame();
     this.tick();
-    setInterval(this.tick.bind(this), 300);
+    setInterval(this.tick, 300);
     setInterval(this.saveGame, 5000);
+  }
+
+  @action.bound
+  toggleAutoAdvance() {
+    this.autoAdvance = !this.autoAdvance;
   }
 
   @action
@@ -31,8 +35,9 @@ class Store {
       return;
     }
 
-    this.stage = store.stage;
+    this.autoAdvance = store.autoAdvance;
     this.highestStage = store.highestStage;
+    this.stage = this.autoAdvance ? this.highestStage : store.stage;
     this.player = new Player(store.player);
     this.enemy = new Enemy(this.stageLevel);
   }
@@ -43,17 +48,22 @@ class Store {
       player: this.player.serialized,
       highestStage: this.highestStage,
       stage: this.stage,
+      autoAdvance: this.autoAdvance
     };
 
     localStorage.setItem('store', JSON.stringify(store));
   }
 
-  @action
+  @action.bound
   tick() {
     const player = this.player;
     this.frame++;
 
-    if (!this.player.alive) {
+    if (!player.alive) {
+      if (this.autoAdvance) {
+        this.stage = this.highestStage;
+      }
+
       this.resetStage();
 
       return;
@@ -64,7 +74,7 @@ class Store {
 
       player.addItems(this.enemy.getLoot(chance));
 
-      let enemyLevel = ~~(this.stageLevel + this.killed / 10);
+      let enemyLevel = Math.floor(this.stageLevel + this.killed / 10);
 
       let isBoss = false;
 
@@ -75,21 +85,19 @@ class Store {
       this.enemy = new Enemy(enemyLevel, isBoss);
       this.killed++;
 
-      if (this.killed >= 10) {
-        this.highestStage = this.stage + 1;
+      if (this.killed === 10 && this.stage === this.highestStage) {
+        this.highestStage++;
       }
 
       return;
     }
 
-    else if (this.canAttack(this.player)) {
-      let out = this.attack(this.player, this.enemy);
-
-      this.lastOut = out;
+    else if (this.canAttack(player)) {
+      this.attack(player, this.enemy);
     }
 
     else if (this.enemy.alive && this.canAttack(this.enemy)) {
-      this.lastIn = this.attack(this.enemy, this.player);
+      this.attack(this.enemy, this.player);
     }
   }
   
@@ -108,7 +116,10 @@ class Store {
       origin.damageTaken -= lifestealHit;
     }
 
+    origin.lastHeal = lifestealHit;
+
     target.damageTaken += hit;
+    target.lastHit = hit;
 
     return hit;
   }
@@ -140,7 +151,7 @@ class Store {
 
   @computed
   get stageLevel() {
-    return this.stage * STAGEMULTI;
+    return Math.floor(this.stage * STAGEMULTI);
   }
 }
 

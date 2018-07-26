@@ -3,6 +3,7 @@ import {inject, observer} from 'mobx-react';
 import Attribute from './Attribute';
 
 const statNames = ['str', 'att', 'hp'];
+const RARITIES = ['', 'common', 'epic', 'legendary'];
 
 @inject('store')
 @observer
@@ -16,24 +17,27 @@ class Item extends Component {
   render() {
     const item = this.props.data;
     
+    let classes = "col item no-flex";
+
+    classes += ' item-' + RARITIES[item.rarity];
+
     return (
+      item &&
       <div
         onClick={this.onClick}
-        className="col item"
-        style={{marginTop: 12}}
+        className={classes}
       >
-        <div className="row start-center">
-          <div className="attribute item-type">
-            <div className="attribute-icon">
-              <img className="attribute-icon-img" src={item.type + '.svg'} alt={item.type} />
-            </div>
-            <span className="attribute-value">{item.level}</span>
+        <div className="row start-center attribute item-type">
+          <div className="attribute-icon">
+            <img className="attribute-icon-img" src={item.type + '.svg'} alt={item.type} />
           </div>
 
           <span className="flex item-name">{item.name || '-'}</span>
+
+          <span className="attribute-value">{item.level}</span>
         </div>
 
-        <div className="row">
+        <div className="row attributes">
           {
             statNames.map((name, idx) => {
               return (

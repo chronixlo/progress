@@ -16,6 +16,10 @@ class Player extends Component {
       <div className="pane">
         <div className="row space-between">
           <span className="name">Enemy</span>
+
+          <span>{-enemy.lastHit}</span>
+          <span>{'+' + enemy.lastHeal}</span>
+
           <div className="total-level">{enemy.total}</div>
         </div>
 

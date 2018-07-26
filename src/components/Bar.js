@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
+import { cn } from '../util';
 
 class Bar extends Component {
   render() {
-    let classes = this.props.className || '';
-
-    classes += ' bar-container';
-    classes += this.props.hideText ? ' bar-text-hidden' : '';
-
     return (
-      <div className={classes}>
+      <div className={cn(
+        this.props.className, 
+        'bar-container', 
+        this.props.hideText && 'bar-text-hidden'
+      )}>
         <div className="bar-face" style={{width: this.props.current/this.props.max * 100 + '%'}}></div>
         <span className="bar-text">
           {this.props.current} / {this.props.max}

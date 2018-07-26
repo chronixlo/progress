@@ -3,6 +3,8 @@ import Item from './Item';
 
 class Enemy {
   @observable damageTaken = 0; 
+  @observable lastHit = 0; 
+  @observable lastHeal = 0; 
   
   @observable stats = {
     str: {
@@ -63,7 +65,7 @@ class Enemy {
   }
 
   getLoot(chance) {
-    if (Math.random() > chance) {
+    if (!this.isBoss && Math.random() > chance) {
       return [];
     }
 
@@ -71,7 +73,7 @@ class Enemy {
   }
 
   getItem(level) {
-    return new Item(level, this.isBoss);
+    return new Item(level * 3, this.isBoss);
   }
 };
 

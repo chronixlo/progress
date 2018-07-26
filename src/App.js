@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {inject, observer} from 'mobx-react';
-import Skill from './Skill';
 import Enemy from './components/Enemy';
 import Player from './components/Player';
 import Stage from './components/Stage';
