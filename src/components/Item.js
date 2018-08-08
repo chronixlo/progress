@@ -40,13 +40,28 @@ class Item extends Component {
         <div className="row attributes">
           {
             statNames.map((name, idx) => {
+              let comparison = false;
+              
+              if (this.props.showComparison) {
+                comparison = ((item.stats[name] || 0) - (this.props.store.player.gear[item.type] ? this.props.store.player.gear[item.type].stats[name] : 0) || 0);
+              }
+
               return (
-                item.stats[name] ?
-                <Attribute
-                  key={idx}
-                  name={name}
-                  level={'+' + item.stats[name]}
-                /> :
+                (item.stats[name] || comparison) ?
+                <div key={idx} className="col">
+                  <Attribute
+                    name={name}
+                    level={'+' + (item.stats[name] || 0)}
+                  />
+                  {
+                    this.props.showComparison &&
+                    <Attribute
+                      name={name}
+                      level={comparison}
+                      comparison={comparison}
+                    />
+                  }
+                </div> :
                 null
               );
             })

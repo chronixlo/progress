@@ -1,40 +1,42 @@
 import { action, computed, observable, toJS } from 'mobx';
-import Inventory from './Inventory';
 
 const ITEM_TYPES = ['helmet', 'armor', 'weapon'];
-class Player {
-  @observable baseStats = {
-    str: {
-      id: 0,
-      name: 'str',
-      level: 3
-    },
-    att: {
-      id: 1,
-      name: 'att',
-      level: 3
-    },
-    hp: {
-      id: 2,
-      name: 'hp',
-      level: 10
-    },
-  };
 
-  @observable _inventory = new Inventory();
-  @observable inventory = this._inventory.inventory;
+class SortType {
+  constructor(name, comparator) {
+    this.name = name;
+    this.comparator = comparator;
+  }
+}
+
+class Inventory {
+  @observable inventory = new Map();
   @observable selected = null;
-  @observable sort = null;
   
-  @observable gear = {
-    armor: null,
-    helmet: null,
-    weapon: null
-  };
+  sortTypes = [
+    new SortType(
+      'Level',
+      (a, b) => b.level - a.level || b.rarity - a.rarity
+    ),
+    new SortType(
+      'Rarity',
+      (a, b) =>  b.rarity - a.rarity || b.level - a.level
+    ),
+    new SortType(
+      'Strength',
+      (a, b) => b.stats.str - a.stats.str || b.level - a.level
+    ),
+    new SortType(
+      'Attack',
+      (a, b) => b.stats.att - a.stats.att || b.level - a.level
+    ),
+    new SortType(
+      'Hitpoints',
+      (a, b) => b.stats.hp - a.stats.hp || b.level - a.level
+    ),
+  ];
 
-  @observable damageTaken = 0;
-  @observable lastHit = 0; 
-  @observable lastHeal = 0;
+  @observable sort = this.sortTypes[0];
 
   lastAttackFrame = 0;
   attackInterval = 2;
@@ -58,6 +60,24 @@ class Player {
       gear: toJS(this.gear),
       inventory: toJS(this.inventory)
     };
+  }
+
+  @computed
+  get bestItems() {
+    const selected = this.selected;
+
+    let items = this.inventory.values().filter(i => selected === null || selected === i.type);
+
+    if (this.sort) {
+      items = items.sort(this.sort.comparator);
+    }
+
+    return items;
+  }
+
+  @action.bound
+  setSort(sort) {
+    this.sort = sort;
   }
 
   @computed
@@ -152,4 +172,4 @@ class Player {
   }
 };
 
-export default Player;
+export default Inventory;

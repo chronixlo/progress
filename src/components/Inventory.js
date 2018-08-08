@@ -12,15 +12,15 @@ class Inventory extends Component {
     const { store } = this.props;
     return (
       <div className="pane col">
-        <div className="row space-between">
+        <div className="row space-between no-flex">
           <span className="name">Inventory</span>
+
           <div>
             <div onClick={this.props.store.player.clearInventory}>Clear all</div>
             <div onClick={this.props.store.player.clearObsolete}>Clear low levels</div>
           </div>
         </div>
         
-
         <div className="row filter-icons no-flex">
           {
             ITEM_TYPES.map((name, idx) => {
@@ -29,9 +29,9 @@ class Inventory extends Component {
                   key={idx} 
                   className={cn(
                     'filter-icon',
-                    store.player.selected === name && 'selected'
+                    store.player._inventory.selected === name && 'selected'
                   )}
-                  onClick={() => store.player.selectFilter(name)}
+                  onClick={() => store.player._inventory.selectFilter(name)}
                 >
                   <img className="stat-icon" src={name + '.svg'} alt={name} />
                 </div>
@@ -39,15 +39,24 @@ class Inventory extends Component {
             })
           }
         </div>
-
-        <div className="col flex scroll">
+        
+        <div className="row space-between">
           {
-            this.props.store.player.bestItems.map((item, idx) => {
+            store.player._inventory.sortTypes.map((item, idx) =>
+              <span key={idx} className="selected" onClick={e => store.player._inventory.setSort(item)}>{item.name}</span>
+            )
+          }
+        </div>
+
+        <div className="inventory col flex scroll">
+          {
+            this.props.store.player._inventory.bestItems.map((item, idx) => {
               return (
                 <Item
                   key={item.id}
                   onClick={this.props.store.player.equipItem}
                   data={item}
+                  showComparison
                 />
               );
             })
